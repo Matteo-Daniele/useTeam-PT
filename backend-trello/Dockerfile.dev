@@ -1,0 +1,25 @@
+# backend/Dockerfile.dev
+#Imagen base con Node.js y un sistema operativo ligero
+FROM node:18-alpine 
+
+#Establece el directorio de trabajo dentro del contenedor
+WORKDIR /app/backend
+
+# Copia los archivos de configuración de npm/yarn
+COPY package*.json ./
+
+# Instala las dependencias. Usa --force o --legacy-peer-deps si hay problemas de compatibilidad.
+# Para NestJS, 'npm ci' es ideal si el package-lock.json está bien.
+RUN npm install
+
+# Copia todo el código fuente del backend.
+# ¡Esto se ejecutará UNA VEZ al construir la imagen!
+# Para desarrollo, el bind mount en docker-compose.yml sobrescribirá esto en tiempo real.
+COPY . .
+
+# Expone el puerto que tu NestJS escuchará
+EXPOSE 3000
+
+# Comando para iniciar la aplicación en modo de desarrollo
+# 'nest start --watch' activa el hot-reloading
+CMD ["npm", "run", "start:dev"]

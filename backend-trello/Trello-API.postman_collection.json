@@ -1,0 +1,663 @@
+{
+	"info": {
+		"_postman_id": "trello-api-collection",
+		"name": "Trello API - Backend",
+		"description": "Colección completa de APIs para el proyecto Trello Backend",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						},
+						"description": "Verificar que la API está funcionando"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para verificar el estado de la API"
+		},
+		{
+			"name": "Boards",
+			"item": [
+				{
+					"name": "Create Board",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Mi Tablero de Prueba\",\n  \"description\": \"Descripción del tablero para testing\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/boards",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"boards"
+							]
+						},
+						"description": "Crear un nuevo tablero"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Boards",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/boards",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"boards"
+							]
+						},
+						"description": "Obtener todos los tableros del usuario"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Board by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/boards/{{board_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"boards",
+								"{{board_id}}"
+							]
+						},
+						"description": "Obtener un tablero específico por ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Board",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Tablero Actualizado\",\n  \"description\": \"Nueva descripción del tablero\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/boards/{{board_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"boards",
+								"{{board_id}}"
+							]
+						},
+						"description": "Actualizar un tablero existente"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Board",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/boards/{{board_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"boards",
+								"{{board_id}}"
+							]
+						},
+						"description": "Eliminar un tablero"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para gestión de tableros"
+		},
+		{
+			"name": "Columns",
+			"item": [
+				{
+					"name": "Create Column",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"To Do\",\n  \"boardId\": \"{{board_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/columns",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"columns"
+							]
+						},
+						"description": "Crear una nueva columna en un tablero"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Board Columns",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/columns?boardId={{board_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"columns"
+							],
+							"query": [
+								{
+									"key": "boardId",
+									"value": "{{board_id}}"
+								}
+							]
+						},
+						"description": "Obtener todas las columnas de un tablero"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Column by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/columns/{{column_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"columns",
+								"{{column_id}}"
+							]
+						},
+						"description": "Obtener una columna específica por ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Column",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"En Progreso\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/columns/{{column_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"columns",
+								"{{column_id}}"
+							]
+						},
+						"description": "Actualizar una columna existente"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Column",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/columns/{{column_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"columns",
+								"{{column_id}}"
+							]
+						},
+						"description": "Eliminar una columna"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para gestión de columnas"
+		},
+		{
+			"name": "Cards",
+			"item": [
+				{
+					"name": "Create Card",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Tarea de Prueba\",\n  \"description\": \"Descripción de la tarea para testing\",\n  \"boardId\": \"{{board_id}}\",\n  \"columnId\": \"{{column_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cards",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cards"
+							]
+						},
+						"description": "Crear una nueva tarjeta en una columna"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Board Cards",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/cards?boardId={{board_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cards"
+							],
+							"query": [
+								{
+									"key": "boardId",
+									"value": "{{board_id}}"
+								}
+							]
+						},
+						"description": "Obtener todas las tarjetas de un tablero"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Column Cards",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/cards?columnId={{column_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cards"
+							],
+							"query": [
+								{
+									"key": "columnId",
+									"value": "{{column_id}}"
+								}
+							]
+						},
+						"description": "Obtener todas las tarjetas de una columna específica"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Card by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/cards/{{card_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cards",
+								"{{card_id}}"
+							]
+						},
+						"description": "Obtener una tarjeta específica por ID"
+					},
+					"response": []
+				},
+				{
+					"name": "Update Card",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"Tarea Actualizada\",\n  \"description\": \"Nueva descripción de la tarea\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cards/{{card_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cards",
+								"{{card_id}}"
+							]
+						},
+						"description": "Actualizar una tarjeta existente"
+					},
+					"response": []
+				},
+				{
+					"name": "Move Card",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"cardId\": \"{{card_id}}\",\n  \"toColumnId\": \"{{target_column_id}}\",\n  \"boardId\": \"{{board_id}}\",\n  \"newOrder\": 0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/cards/move",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cards",
+								"move"
+							]
+						},
+						"description": "Mover una tarjeta de una columna a otra"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Card",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/cards/{{card_id}}",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"cards",
+								"{{card_id}}"
+							]
+						},
+						"description": "Eliminar una tarjeta"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints para gestión de tarjetas"
+		},
+		{
+			"name": "Test Scenarios",
+			"item": [
+				{
+					"name": "Complete Workflow Test",
+					"item": [
+						{
+							"name": "1. Create Board",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Proyecto de Desarrollo\",\n  \"description\": \"Tablero para gestionar el desarrollo de software\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/boards",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"boards"
+									]
+								},
+								"description": "Paso 1: Crear un tablero"
+							},
+							"response": []
+						},
+						{
+							"name": "2. Create Columns",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"To Do\",\n  \"boardId\": \"{{board_id}}\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/columns",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"columns"
+									]
+								},
+								"description": "Paso 2: Crear columna 'To Do'"
+							},
+							"response": []
+						},
+						{
+							"name": "3. Create More Columns",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"In Progress\",\n  \"boardId\": \"{{board_id}}\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/columns",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"columns"
+									]
+								},
+								"description": "Paso 3: Crear columna 'In Progress'"
+							},
+							"response": []
+						},
+						{
+							"name": "4. Create Cards",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Implementar API\",\n  \"description\": \"Crear endpoints para gestión de usuarios\",\n  \"boardId\": \"{{board_id}}\",\n  \"columnId\": \"{{column_id}}\"\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/cards",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"cards"
+									]
+								},
+								"description": "Paso 4: Crear tarjeta en 'To Do'"
+							},
+							"response": []
+						},
+						{
+							"name": "5. Move Card",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"cardId\": \"{{card_id}}\",\n  \"toColumnId\": \"{{target_column_id}}\",\n  \"boardId\": \"{{board_id}}\",\n  \"newOrder\": 0\n}"
+								},
+								"url": {
+									"raw": "{{base_url}}/cards/move",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"cards",
+										"move"
+									]
+								},
+								"description": "Paso 5: Mover tarjeta a 'In Progress'"
+							},
+							"response": []
+						},
+						{
+							"name": "6. Get Complete Board",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/boards/{{board_id}}",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"boards",
+										"{{board_id}}"
+									]
+								},
+								"description": "Paso 6: Verificar el estado final del tablero"
+							},
+							"response": []
+						}
+					],
+					"description": "Flujo completo de trabajo con Trello"
+				}
+			],
+			"description": "Escenarios de prueba completos"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "board_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "column_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "card_id",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "target_column_id",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
