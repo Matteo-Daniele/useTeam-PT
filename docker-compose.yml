@@ -1,0 +1,59 @@
+# docker-compose.yml
+
+services:
+  # 1. Servicio de MongoDB
+  mongo:
+    image: mongo:6 # Usa la imagen oficial de MongoDB (versión 6)
+    container_name: kanban-mongo
+    ports:
+      - "27017:27017" # Mapea el puerto 27017 del host al puerto 27017 del contenedor
+    volumes:
+      - mongo_data:/data/db # Monta un volumen persistente para los datos de MongoDB
+    networks:
+      - kanban-network # Conecta MongoDB a nuestra red interna
+
+  # 2. Servicio del Backend (NestJS)
+  backend:
+    build:
+      context: ./backend-trello # Indica a Docker que el Dockerfile está en la carpeta ./backend
+      dockerfile: Dockerfile.dev # Especifica usar un Dockerfile.dev para desarrollo
+    container_name: kanban-backend
+    ports:
+      - "3000:3000" # Mapea el puerto 3000 del host al puerto 3000 del contenedor
+    environment: # Variables de entorno para el backend dentro del contenedor
+      MONGODB_URI: mongodb://mongo:27017/kanban-board # ¡Importante! Usa el nombre del servicio 'mongo'
+      PORT: 3000
+      N8N_WEBHOOK_URL: http://n8n:5678/webhook/kanban-export # Nombre del servicio 'n8n'
+    volumes:
+      - ./backend-trello:/app/backend # Monta tu código del backend para hot-reloading
+      - /app/backend-trello/node_modules # Impide que el node_modules del host sobreescriba el del contenedor
+    depends_on:
+      - mongo # Asegura que mongo se inicie antes que el backend
+    networks:
+      - kanban-network
+
+  # 3. Servicio de N8N
+  n8n:
+    image: n8nio/n8n:latest # Usa la última imagen de n8n
+    container_name: kanban-n8n
+    ports:
+      - "5678:5678" # Mapea el puerto 5678 del host al puerto 5678 del contenedor
+    environment:
+      N8N_HOST: n8n # Necesario para n8n, usa el nombre del servicio
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      GENERIC_TIMEZONE: Europe/Madrid # Ajusta tu zona horaria
+    volumes:
+      - n8n_data:/home/node/.n8n # Persiste los datos y configuraciones de n8n
+    networks:
+      - kanban-network
+
+# Volúmenes para persistencia de datos
+volumes:
+  mongo_data:
+  n8n_data:
+
+# Red de Docker interna
+networks:
+  kanban-network:
+    driver: bridge # Tipo de red (estándar)
