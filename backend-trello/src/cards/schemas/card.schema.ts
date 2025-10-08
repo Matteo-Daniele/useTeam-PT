@@ -19,16 +19,6 @@ export class Card {
   
   @Prop({ required: true, default: 0 })
   order: number;
-  
-  @Prop({ required: true })
-  userId: string;
-
-  // Add id as a virtual property for convenience
-  get _id(): string {
-    // @ts-ignore
-    return this._id?.toString();
-  }
-
   // createdAt and updatedAt will be added by Mongoose with timestamps: true
   @Prop()
   createdAt: Date;
@@ -44,3 +34,10 @@ CardSchema.index({ boardId: 1, columnId: 1, order: 1 });
 CardSchema.index({ boardId: 1 });
 CardSchema.index({ columnId: 1 });
 CardSchema.index({ createdAt: -1 });
+
+// Virtual id legible y exportación de virtuals en JSON/Objeto
+CardSchema.virtual('id').get(function (this: any) {
+  return this._id ? this._id.toString() : undefined;
+});
+CardSchema.set('toJSON', { virtuals: true });
+CardSchema.set('toObject', { virtuals: true });

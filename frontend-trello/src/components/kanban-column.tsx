@@ -1,73 +1,110 @@
 "use client"
 
-import type React from "react"
-
 import { KanbanCard } from "@/components/kanban-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import type { Card, Column } from "@/types/kanban"
+import { kanbanService } from "@/services/kanbanService"
+import type { KanbanCard as KanbanCardType, KanbanColumn as KanbanColumnType } from "@/types/kanban"
+import { useDroppable } from "@dnd-kit/core"
+import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 import { Pencil, Plus, Trash2 } from "lucide-react"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 
 interface KanbanColumnProps {
-  column: Column
-  onUpdateColumn: (column: Column) => void
+  column: KanbanColumnType
+  boardId: string
+  onUpdateColumn: (column: KanbanColumnType) => void
   onDeleteColumn: () => void
-  onDragStart: (cardId: string, columnId: string) => void
-  onDrop: (columnId: string) => void
+  onRefreshBoard: () => void
 }
 
-export function KanbanColumn({ column, onUpdateColumn, onDeleteColumn, onDragStart, onDrop }: KanbanColumnProps) {
+export function KanbanColumn({ column, boardId, onUpdateColumn, onDeleteColumn, onRefreshBoard }: KanbanColumnProps) {
   const [isEditingTitle, setIsEditingTitle] = useState(false)
-  const [title, setTitle] = useState(column.title)
+  const [title, setTitle] = useState(column.name)
 
-  const handleTitleSave = () => {
+  const { setNodeRef, attributes, listeners, transform, transition, isDragging }  = 
+  useSortable({
+    id: column.id,
+    data: {
+      type: "Column",
+      column
+    },
+    disabled: isEditingTitle // Deshabilitar drag cuando se está editando
+  })
+
+  const style = {
+    transition,
+    transform: CSS.Transform.toString(transform),
+    opacity: isDragging ? 0.5 : 1,
+    cursor: isEditingTitle ? 'default' : 'grab' // Cambiar cursor cuando está editando
+  }
+
+  const cardIds = useMemo(() => column.cards.map((card: KanbanCardType) => card.id), [column.cards])
+
+  // Make the cards list area a droppable target so cards can be dropped into empty columns
+  const { setNodeRef: setCardsDroppableRef } = useDroppable({
+    id: `cards:${column.id}`,
+    data: { type: 'CardsContainer', columnId: column.id }
+  })
+
+
+  const handleTitleSave = async () => {
     if (title.trim()) {
-      onUpdateColumn({ ...column, title: title.trim() })
+      try {
+        await kanbanService.updateColumn(column.id, { name: title.trim() })
+        onUpdateColumn({ ...column, name: title.trim() })
+      } catch (error) {
+        console.error('Failed to update column:', error)
+      }
     }
     setIsEditingTitle(false)
   }
 
-  const addCard = () => {
-    const newCard: Card = {
-      id: Date.now().toString(),
-      name: "New Task",
-      description: "",
+  const addCard = async () => {
+    try {
+      await kanbanService.createCard({
+        title: "New Task",
+        description: "",
+        boardId: boardId,
+        columnId: column.id
+      })
+      onRefreshBoard()
+    } catch (error) {
+      console.error('Failed to create card:', error)
     }
-    onUpdateColumn({
-      ...column,
-      cards: [...column.cards, newCard],
-    })
   }
 
-  const updateCard = (cardId: string, updatedCard: Card) => {
-    onUpdateColumn({
-      ...column,
-      cards: column.cards.map((card) => (card.id === cardId ? updatedCard : card)),
-    })
+  const updateCard = async (cardId: string, updatedCard: KanbanCardType) => {
+    try {
+      await kanbanService.updateCard(cardId, {
+        title: updatedCard.title,
+        description: updatedCard.description
+      })
+      onRefreshBoard()
+    } catch (error) {
+      console.error('Failed to update card:', error)
+    }
   }
 
-  const deleteCard = (cardId: string) => {
-    onUpdateColumn({
-      ...column,
-      cards: column.cards.filter((card) => card.id !== cardId),
-    })
-  }
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-  }
-
-  const handleDropOnColumn = (e: React.DragEvent) => {
-    e.preventDefault()
-    onDrop(column.id)
+  const deleteCard = async (cardId: string) => {
+    try {
+      await kanbanService.deleteCard(cardId)
+      onRefreshBoard()
+    } catch (error) {
+      console.error('Failed to delete card:', error)
+    }
   }
 
   return (
     <div
-      className="flex flex-col w-80 flex-shrink-0 bg-card rounded-lg border border-border"
-      onDragOver={handleDragOver}
-      onDrop={handleDropOnColumn}
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...(!isEditingTitle ? listeners : {})} // Solo aplicar listeners cuando NO está editando
+      className={`flex flex-col w-80 flex-shrink-0 bg-card rounded-lg border border-border ${
+        isEditingTitle ? 'cursor-default' : 'cursor-move'
+      }`}
     >
       <div className="flex items-center justify-between p-4 border-b border-border">
         {isEditingTitle ? (
@@ -81,7 +118,7 @@ export function KanbanColumn({ column, onUpdateColumn, onDeleteColumn, onDragSta
           />
         ) : (
           <h3 className="text-sm font-medium text-foreground flex items-center gap-2">
-            {column.title}
+            {column.name}
             <span className="text-xs text-muted-foreground">({column.cards.length})</span>
           </h3>
         )}
@@ -96,17 +133,18 @@ export function KanbanColumn({ column, onUpdateColumn, onDeleteColumn, onDragSta
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
-        {column.cards.map((card) => (
-          <KanbanCard
-            key={card.id}
-            card={card}
-            columnId={column.id}
-            onUpdateCard={(updated) => updateCard(card.id, updated)}
-            onDeleteCard={() => deleteCard(card.id)}
-            onDragStart={onDragStart}
-          />
-        ))}
+      <div ref={setCardsDroppableRef} className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0">
+            <SortableContext items={cardIds} strategy={verticalListSortingStrategy}>
+              {column.cards.map((card: KanbanCardType) => (
+            <KanbanCard
+              key={card.id}
+              card={card}
+              columnId={column.id}
+              onUpdateCard={(updated) => updateCard(card.id, updated)}
+              onDeleteCard={() => deleteCard(card.id)}
+            />
+          ))}
+        </SortableContext>
       </div>
 
       <div className="p-3 border-t border-border">

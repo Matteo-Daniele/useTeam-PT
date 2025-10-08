@@ -1,51 +1,72 @@
 "use client"
 
-import type React from "react"
-
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { useSortable } from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
 import { Pencil, Trash2 } from "lucide-react"
 import { useState } from "react"
-import type { Card } from "../types/kanban"
+import type { KanbanCard as KanbanCardType } from "../types/kanban"
 
 interface KanbanCardProps {
-  card: Card
+  card: KanbanCardType
   columnId: string
-  onUpdateCard: (card: Card) => void
+  onUpdateCard: (card: KanbanCardType) => void
   onDeleteCard: () => void
-  onDragStart: (cardId: string, columnId: string) => void
 }
 
-export function KanbanCard({ card, columnId, onUpdateCard, onDeleteCard, onDragStart }: KanbanCardProps) {
+export function KanbanCard({ card, columnId, onUpdateCard, onDeleteCard }: KanbanCardProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [name, setName] = useState(card.name)
+  const [name, setName] = useState(card.title)
   const [description, setDescription] = useState(card.description)
+
+  const {
+    setNodeRef,
+    attributes,
+    listeners,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: card.id,
+    data: {
+      type: "Card",
+      card,
+      columnId,
+    },
+    disabled: isEditDialogOpen // Deshabilitar drag cuando se está editando
+  })
+
+  const style = {
+    transition,
+    transform: CSS.Transform.toString(transform),
+    opacity: isDragging ? 0.5 : 1,
+  }
 
   const handleSave = () => {
     onUpdateCard({
       ...card,
-      name: name.trim() || "Untitled",
+      title: name.trim() || "Untitled",
       description: description.trim(),
     })
     setIsEditDialogOpen(false)
   }
 
-  const handleDragStart = (e: React.DragEvent) => {
-    onDragStart(card.id, columnId)
-    e.dataTransfer.effectAllowed = "move"
-  }
-
   return (
     <>
       <div
-        draggable
-        onDragStart={handleDragStart}
-        className="bg-background rounded-md border border-border p-3 cursor-move hover:shadow-md transition-shadow group"
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...(!isEditDialogOpen ? listeners : {})} // Solo aplicar listeners cuando NO está editando
+        className={`bg-background rounded-md border border-border p-3 hover:shadow-md transition-shadow group ${
+          isEditDialogOpen ? 'cursor-default' : 'cursor-move'
+        }`}
       >
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h4 className="text-sm font-medium text-foreground leading-snug flex-1">{card.name}</h4>
+          <h4 className="text-sm font-medium text-foreground leading-snug flex-1">{card.title}</h4>
           <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <Button variant="ghost" size="icon" onClick={() => setIsEditDialogOpen(true)} className="h-6 w-6">
               <Pencil className="h-3 w-3" />
@@ -66,14 +87,14 @@ export function KanbanCard({ card, columnId, onUpdateCard, onDeleteCard, onDragS
           <div className="space-y-4">
             <div>
               <label className="text-sm font-medium mb-2 block">Name</label>
-              <Input placeholder="Card name" value={name} onChange={(e: any) => setName(e.target.value)} />
+              <Input placeholder="Card name" value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div>
               <label className="text-sm font-medium mb-2 block">Description</label>
               <Textarea
                 placeholder="Add a description..."
                 value={description}
-                onChange={(e: any) => setDescription(e.target.value)}
+                onChange={(e) => setDescription(e.target.value)}
                 rows={4}
               />
             </div>

@@ -23,10 +23,10 @@ services:
     environment: # Variables de entorno para el backend dentro del contenedor
       MONGODB_URI: mongodb://mongo:27017/kanban-board # ¡Importante! Usa el nombre del servicio 'mongo'
       PORT: 3000
-      N8N_WEBHOOK_URL: http://n8n:5678/webhook/kanban-export # Nombre del servicio 'n8n'
+      N8N_WEBHOOK_URL: http://n8n:5678/webhook-test/trello-backlog # Nombre del servicio 'n8n'
     volumes:
       - ./backend-trello:/app/backend # Monta tu código del backend para hot-reloading
-      - /app/backend-trello/node_modules # Impide que el node_modules del host sobreescriba el del contenedor
+      - /app/backend/node_modules # Impide que el node_modules del host sobreescriba el del contenedor
     depends_on:
       - mongo # Asegura que mongo se inicie antes que el backend
     networks:

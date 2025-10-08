@@ -4,9 +4,10 @@ import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Pencil, Plus, Trash2 } from "lucide-react"
+import { Download, Pencil, Plus, Trash2 } from "lucide-react"
 import { useState } from "react"
 import type { Board } from "../types/kanban"
+import { ExportBacklogDialog } from "./ExportBacklogDialog"
 
 interface BoardSelectorProps {
   boards: Board[]
@@ -27,6 +28,7 @@ export function BoardSelector({
 }: BoardSelectorProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false)
+  const [isExportDialogOpen, setIsExportDialogOpen] = useState(false)
   const [newBoardName, setNewBoardName] = useState("")
   const [renameBoardName, setRenameBoardName] = useState("")
 
@@ -91,6 +93,18 @@ export function BoardSelector({
                 <Trash2 className="h-4 w-4" />
               </Button>
             )}
+
+            {currentBoard && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => setIsExportDialogOpen(true)} 
+                className="h-9 w-9"
+                title="Exportar backlog"
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+            )}
           </div>
 
           <Button onClick={() => setIsAddDialogOpen(true)} className="gap-2">
@@ -108,8 +122,8 @@ export function BoardSelector({
           <Input
             placeholder="Board name"
             value={newBoardName}
-            onChange={(e: any) => setNewBoardName(e.target.value)}
-            onKeyDown={(e: any) => e.key === "Enter" && handleAddBoard()}
+            onChange={(e) => setNewBoardName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleAddBoard()}
           />
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
@@ -128,8 +142,8 @@ export function BoardSelector({
           <Input
             placeholder="Board name"
             value={renameBoardName}
-            onChange={(e: any) => setRenameBoardName(e.target.value)}
-            onKeyDown={(e: any) => e.key === "Enter" && handleRenameBoard()}
+            onChange={(e) => setRenameBoardName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && handleRenameBoard()}
           />
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsRenameDialogOpen(false)}>
@@ -139,6 +153,16 @@ export function BoardSelector({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Dialog de Exportación */}
+      {currentBoard && (
+        <ExportBacklogDialog
+          isOpen={isExportDialogOpen}
+          onClose={() => setIsExportDialogOpen(false)}
+          boardId={currentBoard.id}
+          boardName={currentBoard.name}
+        />
+      )}
     </>
   )
 }

@@ -266,6 +266,34 @@
 						"description": "Eliminar una columna"
 					},
 					"response": []
+				},
+				{
+					"name": "Reorder Column",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"columnId\": \"{{column_id}}\",\n  \"boardId\": \"{{board_id}}\",\n  \"newOrder\": 2\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/columns/reorder",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"columns",
+								"reorder"
+							]
+						},
+						"description": "Reordenar una columna en el tablero"
+					},
+					"response": []
 				}
 			],
 			"description": "Endpoints para gestión de columnas"

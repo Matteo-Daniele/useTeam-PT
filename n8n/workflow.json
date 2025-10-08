@@ -1,0 +1,142 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "trello-backlog",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        -32
+      ],
+      "id": "6ca0729b-ca94-40f5-8cf0-17d8e8401106",
+      "name": "Webhook",
+      "webhookId": "8edf44f4-6796-41f0-a42b-e7d5dd98ed52"
+    },
+    {
+      "parameters": {
+        "fromEmail": "matteodaniele222@gmail.com",
+        "toEmail": "={{ $json.email }}",
+        "subject": "=Backlog CSV - {{ $json.boardName }} ({{ $json.totalCards }} tarjetas)",
+        "html": "=<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"UTF-8\">\n    <style>\n        body { \n            font-family: Arial, sans-serif; \n            margin: 20px; \n            background-color: #f5f5f5;\n        }\n        .container {\n            max-width: 800px;\n            margin: 0 auto;\n            background-color: white;\n            padding: 20px;\n            border-radius: 10px;\n            box-shadow: 0 2px 10px rgba(0,0,0,0.1);\n        }\n        .header { \n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n            color: white;\n            padding: 20px; \n            border-radius: 8px; \n            text-align: center;\n            margin-bottom: 20px;\n        }\n        .header h1 {\n            margin: 0;\n            font-size: 24px;\n        }\n        .stats { \n            background-color: #e8f4fd; \n            padding: 15px; \n            border-radius: 8px; \n            margin: 20px 0;\n            border-left: 4px solid #2196F3;\n        }\n        .stats h3 {\n            margin-top: 0;\n            color: #1976D2;\n        }\n        .csv-section {\n            background-color: #f9f9f9; \n            padding: 20px; \n            border-radius: 8px; \n            margin: 20px 0;\n            border: 1px solid #ddd;\n        }\n        .csv-content { \n            font-family: 'Courier New', monospace; \n            white-space: pre-wrap;\n            background-color: white;\n            padding: 15px;\n            border-radius: 5px;\n            border: 1px solid #ccc;\n            overflow-x: auto;\n            font-size: 12px;\n            line-height: 1.4;\n        }\n        .download-section {\n            background-color: #e8f5e8;\n            padding: 15px;\n            border-radius: 8px;\n            margin: 20px 0;\n            text-align: center;\n            border: 1px solid #4CAF50;\n        }\n        .footer {\n            text-align: center;\n            margin-top: 30px;\n            padding-top: 20px;\n            border-top: 1px solid #eee;\n            color: #666;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"container\">\n        <div class=\"header\">\n            <h1>📊 Backlog CSV - {{ $json.boardName }}</h1>\n            <p>Reporte generado automáticamente desde tu sistema Kanban</p>\n        </div>\n        \n        <div class=\"stats\">\n            <h3>📈 Estadísticas del Backlog</h3>\n            <p><strong>📋 Total de tarjetas:</strong> {{ $json.totalCards }}</p>\n            <p><strong>📅 Fecha de generación:</strong> {{ new Date().toLocaleString('es-ES') }}</p>\n            <p><strong>🆔 ID de solicitud:</strong> {{ $json.requestId }}</p>\n            <p><strong>📁 Nombre del archivo:</strong> {{ $json.fileName }}</p>\n        </div>\n        \n        <div class=\"csv-section\">\n            <h3>📄 Contenido del CSV</h3>\n            <p>Puedes copiar el contenido de abajo y pegarlo en Excel, Google Sheets o cualquier editor de texto.</p>\n            <div class=\"csv-content\">{{ $json.csvContent }}</div>\n        </div>\n        \n        <div class=\"download-section\">\n            <h3>💾 Instrucciones para usar el CSV</h3>\n            <p><strong>Para Excel:</strong> Copia el contenido y pégalo en una nueva hoja</p>\n            <p><strong>Para Google Sheets:</strong> Ve a Archivo → Importar → Pegar texto</p>\n            <p><strong>Para guardar como archivo:</strong> Copia el contenido en un archivo .csv</p>\n        </div>\n        \n        <div class=\"footer\">\n            <p>📧 Este email fue generado automáticamente por tu sistema Kanban</p>\n            <p>🕒 Generado el {{ new Date().toLocaleString('es-ES') }}</p>\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        768,
+        -16
+      ],
+      "id": "27bb5a73-7d58-4a3c-ab5f-fab14caf07e0",
+      "name": "Send email",
+      "webhookId": "cfcfcdad-4193-43c2-a68f-8eb016ed132b",
+      "credentials": {
+        "smtp": {
+          "id": "CYUaupoM3OQ37Wsm",
+          "name": "SMTP account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"error\": \"={{ $json.error.message }}\",\n  \"requestId\": \"={{ $json.requestId }}\",\n  \"email\": \"={{ $json.email }}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        976,
+        -16
+      ],
+      "id": "477f1f3b-d39f-4ec3-8523-a411f0a4a78d",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        -16
+      ],
+      "id": "fb59afbf-c242-4cb8-8ab7-e68c3085857b",
+      "name": "Log error"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Obtener los datos del webhook\nconst email = $input.first().json.body.email;\nconst boardName = $input.first().json.body.boardName;\nconst requestId = $input.first().json.body.requestId;\nconst cards = $input.first().json.body.cards; // Ya es un array, no necesitamos parsear\n\nconsole.log('=== DEBUG INFO ===');\nconsole.log('Email:', email);\nconsole.log('BoardName:', boardName);\nconsole.log('RequestId:', requestId);\nconsole.log('Cards type:', typeof cards);\nconsole.log('Cards value:', cards);\nconsole.log('Is array:', Array.isArray(cards));\n\n// Verificar que cards existe y es un array\nif (!cards || !Array.isArray(cards)) {\n  console.error('Cards is not a valid array:', cards);\n  return [{\n    json: {\n      email: email,\n      boardName: boardName,\n      requestId: requestId,\n      csvContent: 'No hay datos de tarjetas disponibles',\n      totalCards: 0,\n      fileName: `backlog_${boardName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`,\n      error: 'No valid cards data'\n    }\n  }];\n}\n\nif (cards.length === 0) {\n  console.warn('No cards found in the data');\n  return [{\n    json: {\n      email: email,\n      boardName: boardName,\n      requestId: requestId,\n      csvContent: 'No hay tarjetas en este board',\n      totalCards: 0,\n      fileName: `backlog_${boardName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`,\n      error: 'No cards found'\n    }\n  }];\n}\n\nconsole.log('Cards found:', cards.length);\nconsole.log('First card:', cards[0]);\n\n// Función para escapar valores CSV\nfunction escapeCSV(value) {\n  if (value === null || value === undefined) return '';\n  const stringValue = String(value);\n  if (stringValue.includes(',') || stringValue.includes('\"') || stringValue.includes('\\n')) {\n    return '\"' + stringValue.replace(/\"/g, '\"\"') + '\"';\n  }\n  return stringValue;\n}\n\n// Generar encabezados CSV\nconst headers = ['ID', 'Título', 'Descripción', 'Columna', 'Fecha de Creación'];\n\n// Generar filas CSV\nconst csvRows = cards.map((card, index) => {\n  console.log(`Processing card ${index + 1}:`, card);\n  \n  // Verificar que la card tiene todos los campos necesarios\n  const cardData = {\n    id: card.id || 'Sin ID',\n    title: card.title || 'Sin título',\n    description: card.description || 'Sin descripción',\n    column: card.column || 'Sin columna',\n    createdAt: card.createdAt || 'Sin fecha'\n  };\n  \n  console.log(`Card ${index + 1} data:`, cardData);\n  \n  return [\n    escapeCSV(cardData.id),\n    escapeCSV(cardData.title),\n    escapeCSV(cardData.description),\n    escapeCSV(cardData.column),\n    escapeCSV(cardData.createdAt)\n  ];\n});\n\n// Crear el CSV completo\nconst csvContent = [\n  headers.join(','),\n  ...csvRows.map(row => row.join(','))\n].join('\\n');\n\nconsole.log('CSV generated successfully:');\nconsole.log('- Total cards:', cards.length);\nconsole.log('- CSV length:', csvContent.length);\nconsole.log('- CSV content preview:');\nconsole.log(csvContent.substring(0, 500) + '...');\n\n// Preparar datos para el email\nreturn [{\n  json: {\n    email: email,\n    boardName: boardName,\n    requestId: requestId,\n    csvContent: csvContent,\n    totalCards: cards.length,\n    fileName: `backlog_${boardName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().split('T')[0]}.csv`,\n    cards: cards, // Incluir las cards para debugging\n    debug: {\n      cardsLength: cards.length,\n      cardsType: typeof cards,\n      firstCard: cards[0] || null,\n      csvPreview: csvContent.substring(0, 200)\n    }\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        160
+      ],
+      "id": "3ffa2d79-3eac-47f4-a489-d54540c45322",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send email": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Log error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e31e3eb3-ab30-41e7-a06d-a764bf8ff5e5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c7e4f72146d30401cd590b8407f38c82a572ec9164d5b61ece224b8f8c2267aa"
+  },
+  "id": "m23Yg8MRUEAvmy1z",
+  "tags": []
+}

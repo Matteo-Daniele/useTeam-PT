@@ -7,6 +7,8 @@ import { BoardsModule } from './boards/boards.module';
 import { CardsModule } from './cards/cards.module';
 import { ColumnsModule } from './columns/columns.module';
 import { ConfigModule } from './config';
+import { ExportModule } from './export/export.module';
+import { RealtimeModule } from './realtime/realtime.module';
 
 @Module({
   imports: [
@@ -19,7 +21,9 @@ import { ConfigModule } from './config';
     }),
     BoardsModule,
     ColumnsModule,
-    CardsModule
+    CardsModule,
+    ExportModule,
+    RealtimeModule
   ],
   controllers: [AppController],
   providers: [AppService],

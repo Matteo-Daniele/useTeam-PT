@@ -1,13 +1,13 @@
 import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    Param,
-    Patch,
-    Post,
-    Request
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post
 } from '@nestjs/common';
+import { RealtimeGateway } from '../realtime/realtime.gateway';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { GetBoardDto } from './dto/get-board.dto';
@@ -15,54 +15,63 @@ import { UpdateBoardDto } from './dto/update-board.dto';
 
 @Controller('boards')
 export class BoardsController {
-  constructor(private boardsService: BoardsService) {}
+  constructor(
+    private boardsService: BoardsService,
+    private realtimeGateway: RealtimeGateway,
+  ) {}
   
   // POST /boards - Crear nuevo tablero
   @Post()
-  async createBoard(
-    @Body() createBoardDto: CreateBoardDto,
-    @Request() req: any // En producción usarías un AuthGuard
-  ): Promise<GetBoardDto> {
-    const userId = req.user?.id || 'demo-user'; // Demo para testing
-    return await this.boardsService.createBoard(createBoardDto, userId);
+  async createBoard(@Body() createBoardDto: CreateBoardDto): Promise<GetBoardDto> {
+    const board = await this.boardsService.createBoard(createBoardDto);
+    
+    // Emitir evento de tiempo real a todos los usuarios conectados
+    // Como es un board nuevo, emitimos a todos los usuarios
+    this.realtimeGateway.server.emit('board:created', {
+      board,
+      timestamp: new Date(),
+    });
+    
+    return board;
   }
   
-  // GET /boards - Obtener todos los tableros del usuario
+  // GET /boards - Obtener todos los tableros
   @Get()
-  async getUserBoards(@Request() req: any): Promise<GetBoardDto[]> {
-    const userId = req.user?.id || 'demo-user';
-    return await this.boardsService.getUserBoards(userId);
+  async getAllBoards(): Promise<GetBoardDto[]> {
+    return await this.boardsService.getAllBoards();
   }
   
   // GET /boards/:id - Obtener tablero específico
   @Get(':id')
-  async getById(
-    @Param('id') id: string,
-    @Request() req: any
-  ): Promise<GetBoardDto> {
-    const userId = req.user?.id || 'demo-user';
-    return await this.boardsService.getById(id, userId);
+  async getById(@Param('id') id: string): Promise<GetBoardDto> {
+    return await this.boardsService.getById(id);
   }
   
   // PATCH /boards/:id - Actualizar tablero
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateBoardDto: UpdateBoardDto,
-    @Request() req: any
+    @Body() updateBoardDto: UpdateBoardDto
   ): Promise<GetBoardDto> {
-    const userId = req.user?.id || 'demo-user';
-    return await this.boardsService.update(id, updateBoardDto, userId);
+    const board = await this.boardsService.update(id, updateBoardDto);
+    
+    // Emitir evento de tiempo real
+    this.realtimeGateway.emitBoardUpdated(id, board);
+    
+    return board;
   }
   
   // DELETE /boards/:id - Eliminar tablero
   @Delete(':id')
-  async delete(
-    @Param('id') id: string,
-    @Request() req: any
-  ): Promise<{ message: string }> {
-    const userId = req.user?.id || 'demo-user';
-    await this.boardsService.delete(id, userId);
+  async delete(@Param('id') id: string): Promise<{ message: string }> {
+    await this.boardsService.delete(id);
+    
+    // Emitir evento de tiempo real para notificar eliminación a todos los usuarios
+    this.realtimeGateway.server.emit('board:deleted', {
+      boardId: id,
+      timestamp: new Date(),
+    });
+    
     return { message: 'Board deleted successfully' };
   }
 }

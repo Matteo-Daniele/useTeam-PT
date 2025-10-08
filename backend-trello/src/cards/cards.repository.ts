@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, isValidObjectId } from 'mongoose';
 import { CreateCardDto } from './dto/create-card.dto';
 import { MoveCardDto } from './dto/move-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
@@ -11,13 +11,12 @@ export class CardsRepository {
   constructor(@InjectModel(Card.name) private cardModel: Model<CardDocument>) {}
   
   // Crear una nueva tarjeta
-  async create(createCardDto: CreateCardDto, userId: string): Promise<Card> {
+  async create(createCardDto: CreateCardDto): Promise<Card> {
     // Obtener el siguiente orden en la columna
     const maxOrder = await this.getMaxOrderInColumn(createCardDto.columnId);
     
     const card = new this.cardModel({
       ...createCardDto,
-      userId,
       order: maxOrder + 1
     });
     return await card.save();
@@ -25,6 +24,7 @@ export class CardsRepository {
   
   // Buscar tarjeta por ID
   async findById(id: string): Promise<Card | null> {
+    if (!isValidObjectId(id)) return null;
     return await this.cardModel.findById(id);
   }
   
@@ -40,6 +40,7 @@ export class CardsRepository {
   
   // Actualizar tarjeta
   async update(id: string, updateCardDto: UpdateCardDto): Promise<Card | null> {
+    if (!isValidObjectId(id)) return null;
     return await this.cardModel.findByIdAndUpdate(
       id, 
       updateCardDto, 
@@ -49,6 +50,7 @@ export class CardsRepository {
   
   // Eliminar tarjeta
   async delete(id: string): Promise<boolean> {
+    if (!isValidObjectId(id)) return false;
     const result = await this.cardModel.findByIdAndDelete(id);
     return !!result;
   }
@@ -68,6 +70,10 @@ export class CardsRepository {
   // Mover tarjeta a otra columna
   async moveCard(moveCardDto: MoveCardDto): Promise<Card | null> {
     const { cardId, toColumnId, newOrder } = moveCardDto;
+    // Validar IDs para evitar CastError (500) y responder de forma controlada
+    if (!isValidObjectId(cardId) || !isValidObjectId(toColumnId)) {
+      return null;
+    }
     
     // Actualizar la tarjeta
     return await this.cardModel.findByIdAndUpdate(

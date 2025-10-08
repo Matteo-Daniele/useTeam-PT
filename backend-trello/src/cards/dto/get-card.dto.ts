@@ -5,7 +5,6 @@ export class GetCardDto {
   boardId: string;
   columnId: string;
   order: number;
-  userId: string;
   createdAt: Date;
   updatedAt: Date;
 }

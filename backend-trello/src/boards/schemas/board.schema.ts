@@ -10,9 +10,6 @@ export class Board {
   
   @Prop({ trim: true })
   description?: string;
-  
-  @Prop({ required: true })
-  userId: string;
 }
 
 export const BoardSchema = SchemaFactory.createForClass(Board);
